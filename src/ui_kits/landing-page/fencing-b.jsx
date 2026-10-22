@@ -107,27 +107,32 @@ function BHeader() {
   );
 }
 
+const STATS = [['30+', 'Years in business'], ['60,000+', 'Projects built'], ['4.5★', 'Google & Yelp'], ['850+', 'Reviews'], ['USA', 'Made in our LA factory']];
+const STATS_WORDS = ['homeowners', 'architects', 'builders', 'developers', 'HOAs'];
+
 function BHero() {
   const [i, setI] = React.useState(0);
+  const [w, setW] = React.useState(0);
   const isMobile = useIsMobile(768);
   React.useEffect(() => { const t = setInterval(() => setI(n => (n + 1) % HERO_IMGS.length), 6000); return () => clearInterval(t); }, [i]);
+  React.useEffect(() => { const t = setInterval(() => setW(n => (n + 1) % STATS_WORDS.length), 2200); return () => clearInterval(t); }, []);
 
   if (isMobile) {
     return (
       <section style={{ position: 'relative', overflow: 'hidden', color: '#fff', background: '#0B1A2C' }}>
-        {/* Top clean image with zoom-in */}
-        <div style={{ position: 'relative', width: '100%', height: 'clamp(360px, 54vh, 480px)', overflow: 'hidden' }}>
+        {/* Top clean image with zoom-in - compact height so text moves up */}
+        <div style={{ position: 'relative', width: '100%', height: 'clamp(230px, 34vh, 290px)', overflow: 'hidden' }}>
           <img className="hero-zoom-bg" src={SITE + toThumb(HERO_IMGS[0])} alt="Premium Aluminum Fencing" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 60%', display: 'block' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0) 65%, rgba(11,26,44,.95) 100%)' }} />
         </div>
 
         {/* Content & CTA */}
-        <div style={{ padding: '24px 16px 36px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+        <div style={{ padding: '16px 16px 36px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <Kicker color="var(--mb-yellow)">Limited-Time Fencing Offer</Kicker>
-          <h1 style={{ margin: '14px 0 0', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(28px,7.5vw,36px)', lineHeight: 1.08, letterSpacing: '-0.02em', color: '#fff' }}>
+          <h1 style={{ margin: '10px 0 0', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(28px,7.5vw,36px)', lineHeight: 1.08, letterSpacing: '-0.02em', color: '#fff' }}>
             Premium Aluminum Fencing in SoCal
           </h1>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 10, margin: '14px auto 0' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 10, margin: '10px auto 0' }}>
             <span style={{ fontFamily: 'var(--font-ui)', fontWeight: 600, fontSize: 18, color: '#fff' }}>Save</span>
             <span
               className="text-llamador-pulse"
@@ -144,13 +149,37 @@ function BHero() {
               Up to 60%*
             </span>
           </div>
-          <p style={{ ...bBody, color: '#fff', fontWeight: 600, fontSize: 15.5, lineHeight: 1.45, margin: '14px 0 0' }}>
+          <p style={{ ...bBody, color: '#fff', fontWeight: 600, fontSize: 15.5, lineHeight: 1.45, margin: '10px 0 0' }}>
             Create more privacy, security, and curb appeal with custom aluminum fencing built for your property.
           </p>
-          <p style={{ ...bBody, color: 'rgba(255,255,255,.85)', fontSize: 14, lineHeight: 1.5, margin: '10px 0 0' }}>
-            For a limited time, Mulholland Brand is offering up to 60% off premium fencing. Choose a modern architectural look, a wood-look aluminum finish, or a privacy-forward design, then let our local team fabricate and install it around your home.
-          </p>
-          <BB href="tel:8005625770" size="lg" variant="outline-light" icon="phone" style={{ fontSize: 15, height: 50, padding: '0 24px', width: '100%', maxWidth: 360, justifyContent: 'center', margin: '18px 0 0', textShadow: 'none' }}>
+
+          {/* Authority points moved where the text was on mobile */}
+          <div style={{
+            width: '100%',
+            maxWidth: 420,
+            margin: '16px 0 14px',
+            padding: '16px 12px 14px',
+            borderRadius: 8,
+            overflow: 'hidden',
+            border: '1px solid rgba(255,255,255,.08)',
+            background: 'repeating-linear-gradient(180deg, rgba(255,255,255,.035) 0px, rgba(255,255,255,.035) 9px, rgba(0,0,0,.16) 9px, rgba(0,0,0,.16) 12px), linear-gradient(90deg, #161C27 0%, #1C2331 50%, #161C27 100%)'
+          }}>
+            <div style={{ textAlign: 'center', fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 19, letterSpacing: '-0.01em', lineHeight: 1.1, marginBottom: 12, color: '#fff' }}>
+              Trusted by <span key={w} style={{ fontWeight: 700, color: 'var(--mb-yellow)', display: 'inline-block', animation: 'bWordIn 500ms var(--ease-out)' }}>{STATS_WORDS[w]}</span>
+            </div>
+            <div style={{ overflow: 'hidden', width: '100%' }}>
+              <div className="mb-marquee-track" style={{ gap: 28, paddingLeft: 12 }}>
+                {[...STATS, ...STATS].map(([n, l], idx) => (
+                  <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, minWidth: 120, color: 'rgba(214,220,230,.88)' }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 24, lineHeight: 1, letterSpacing: '-0.02em', color: 'var(--mb-yellow)' }}>{n}</span>
+                    <span style={{ fontFamily: 'var(--font-ui)', fontWeight: 600, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', opacity: .85, textAlign: 'center' }}>{l}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <BB href="tel:8005625770" size="lg" variant="outline-light" icon="phone" style={{ fontSize: 15, height: 50, padding: '0 24px', width: '100%', maxWidth: 360, justifyContent: 'center', margin: '4px 0 0', textShadow: 'none' }}>
             Call (800) 562-5770
           </BB>
           <p style={{ margin: '10px 0 0', fontFamily: 'var(--font-ui)', fontStyle: 'italic', fontSize: 11.5, opacity: .8, color: 'rgba(255,255,255,.7)' }}>
@@ -213,10 +242,11 @@ function BHero() {
 }
 
 function StatsBand() {
-  const stats = [['30+', 'Years in business'], ['60,000+', 'Projects built'], ['4.5★', 'Google & Yelp'], ['850+', 'Reviews'], ['USA', 'Made in our LA factory']];
-  const words = ['homeowners', 'architects', 'builders', 'developers', 'HOAs'];
-  const [w, setW] = React.useState(0);
   const isMobile = useIsMobile(768);
+  if (isMobile) return null;
+  const stats = STATS;
+  const words = STATS_WORDS;
+  const [w, setW] = React.useState(0);
   React.useEffect(() => { const t = setInterval(() => setW(n => (n + 1) % words.length), 2200); return () => clearInterval(t); }, []);
   return <section style={{ position: 'relative', overflow: 'hidden', color: '#fff', padding: isMobile ? '36px 0 32px' : 'clamp(48px,5vw,72px) 0 clamp(44px,5vw,64px)', background: 'repeating-linear-gradient(180deg, rgba(255,255,255,.035) 0px, rgba(255,255,255,.035) 9px, rgba(0,0,0,.16) 9px, rgba(0,0,0,.16) 12px), linear-gradient(90deg, #161C27 0%, #1C2331 50%, #161C27 100%)' }}>
     <h2 style={{ margin: '0 0 clamp(20px,3.5vw,44px)', textAlign: 'center', fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: 'clamp(24px,2.8vw,38px)', letterSpacing: '-0.01em', lineHeight: 1.1 }}>Trusted by <span key={w} style={{ fontWeight: 700, color: 'var(--mb-yellow)', display: 'inline-block', animation: 'bWordIn 500ms var(--ease-out)' }}>{words[w]}</span></h2>
