@@ -133,26 +133,106 @@ function ThankYou({ dark }) {
   </div>;
 }
 
-function FenceForm() {
-  const [sent, setSent] = React.useState(false);
+// Webhook endpoint seguro ofuscado en base64 para evitar scrapers y bots
+const _ZAP_ENDPOINT = typeof atob !== 'undefined' ? atob('aHR0cHM6Ly9ob29rcy56YXBpZXIuY29tL2hvb2tzL2NhdGNoLzQ0MTY0NC80MmZ1dWZzLw==') : '';
+const REDIRECT_THANKS_URL = 'https://lp.mulhollandbrand.com/thanks-page';
+
+function FenceForm({ navy }) {
+  const [loading, setLoading] = React.useState(false);
   const [optIn, setOptIn] = React.useState(false);
-  return <form onSubmit={e => { e.preventDefault(); setSent(true); }} style={{ background: 'var(--grad-blue-panel)', color: '#fff', boxShadow: 'var(--shadow-panel)', width: '100%', maxWidth: 420 }}>
+  const [fullName, setFullName] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [phone, setPhone] = React.useState('');
+  const [zipCode, setZipCode] = React.useState('');
+  const [interest, setInterest] = React.useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      const now = new Date();
+      const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+      const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+
+      const selectedStyle = interest || 'I’m Not Sure Yet';
+
+      const payload = {
+        full_name: fullName.trim(),
+        name: fullName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        zip_code: zipCode.trim(),
+        zip: zipCode.trim(),
+        Interest: selectedStyle,
+        interest: selectedStyle,
+        fencing_style: selectedStyle,
+        sms_opt_in: optIn ? 'Yes' : 'No',
+        landing: 'fencing-promotion',
+        full_url: currentUrl,
+        utm_source: urlParams.get('utm_source') || '',
+        utm_medium: urlParams.get('utm_medium') || '',
+        utm_campaign: urlParams.get('utm_campaign') || '',
+        utm_content: urlParams.get('utm_content') || '',
+        utm_term: urlParams.get('utm_term') || '',
+        submission_date_time: now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }) + ' (PT)',
+        submission_date_iso: now.toISOString(),
+        user_timezone: typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : '',
+        screen_resolution: typeof window !== 'undefined' ? `${window.screen.width}x${window.screen.height}` : ''
+      };
+
+      // 1. Intento A: Endpoint proxy de la arquitectura (/api/submit-lead)
+      let sent = false;
+      try {
+        const proxyRes = await fetch('/api/submit-lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (proxyRes.ok) sent = true;
+      } catch (err) {}
+
+      // 2. Intento B: Si el proxy interno no está en la misma ruta, despachar directo al webhook ofuscado
+      if (!sent && _ZAP_ENDPOINT) {
+        try {
+          await fetch(_ZAP_ENDPOINT, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        } catch (err) {}
+      }
+    } catch (err) {
+      console.warn('Form dispatch notice:', err);
+    }
+
+    // Redirección inmediata a la Thank You Page
+    if (typeof window !== 'undefined') {
+      window.location.href = REDIRECT_THANKS_URL;
+    }
+  };
+
+  return <form onSubmit={handleSubmit} style={{ background: navy ? 'linear-gradient(180deg, #10243C 0%, #0B1A2C 100%)' : 'var(--grad-blue-panel)', color: '#fff', boxShadow: 'var(--shadow-panel)', width: '100%', maxWidth: 420, borderRadius: 6, overflow: 'hidden' }}>
     <div style={{ background: 'var(--mb-blue)', color: 'var(--mb-yellow)', fontFamily: 'var(--font-ui)', fontWeight: 700, fontSize: 10.5, textAlign: 'center', padding: '7px 10px' }}>Up to 60% Off · Select Styles &amp; Available Inventory*</div>
     <div style={{ padding: '24px 26px 26px' }}>
-      {sent ? <ThankYou dark /> : <>
-        <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, lineHeight: 1.15, textAlign: 'center' }}>Get Up to 60% Off on Premium Fencing</h3>
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: 11.5, textAlign: 'center', margin: '8px 0 16px' }}>Complete the form to request your Free On-Site Estimate.</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <FText variant="boxed" label="Full Name" required /><FText variant="boxed" label="Email Address" type="email" required />
-          <FText variant="boxed" label="Phone Number" type="tel" required /><FText variant="boxed" label="ZIP Code" required />
-          <FSelect variant="boxed" label="Select a fencing style" options={FENCE_STYLES} />
-          <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontFamily: 'var(--font-ui)', fontSize: 10, lineHeight: 1.4, cursor: 'pointer', margin: '4px 0' }}>
-            <input type="checkbox" checked={optIn} onChange={() => setOptIn(!optIn)} style={{ accentColor: 'var(--mb-gold)', margin: '1px 0 0', width: 14, height: 14 }} />
-            Text me updates about my quote (optional)
-          </label>
-          <FB variant="accent" type="submit" fullWidth size="sm" style={{ fontSize: 10.5 }}>Request My Free Estimate</FB>
-        </div>
-      </>}
+      <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, lineHeight: 1.15, textAlign: 'center' }}>Get Up to 60% Off on Premium Fencing</h3>
+      <p style={{ fontFamily: 'var(--font-display)', fontSize: 11.5, textAlign: 'center', margin: '8px 0 16px' }}>Complete the form to request your Free On-Site Estimate.</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <FText variant="boxed" label="Full Name" name="full_name" value={fullName} onChange={e => setFullName(e.target.value)} required />
+        <FText variant="boxed" label="Email Address" name="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+        <FText variant="boxed" label="Phone Number" name="phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} required />
+        <FText variant="boxed" label="ZIP Code" name="zip_code" value={zipCode} onChange={e => setZipCode(e.target.value)} required />
+        <FSelect variant="boxed" label="Select a fencing style" name="Interest" value={interest} onChange={e => setInterest(e.target.value)} options={FENCE_STYLES} />
+        <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontFamily: 'var(--font-ui)', fontSize: 10, lineHeight: 1.4, cursor: 'pointer', margin: '4px 0' }}>
+          <input type="checkbox" checked={optIn} onChange={() => setOptIn(!optIn)} style={{ accentColor: 'var(--mb-gold)', margin: '1px 0 0', width: 14, height: 14 }} />
+          Text me updates about my quote (optional)
+        </label>
+        <FB variant="accent" type="submit" fullWidth size="sm" disabled={loading} style={{ fontSize: 10.5, opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
+          {loading ? 'Submitting...' : 'Request My Free Estimate'}
+        </FB>
+      </div>
     </div>
   </form>;
 }
